@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="An interactive reversal-learning lab using published fruit-fly anatomy and measured odor responses.">
+  <title>FlyFlip Lab</title>
+  <style>
+    :root { color-scheme: light; --paper:#f5f2e9; --card:#fffdf6; --ink:#202f28; --muted:#546459; --border:#d9ded2; --dark:#15322a; --obs:#13765a; --ctrl:#a65321; --direct:#425d9d; --gold:#f0c477; font: 16px/1.65 system-ui, Tahoma, sans-serif; }
+    * { box-sizing:border-box; }
+    body { margin:0; color:var(--ink); background:var(--paper); }
+    button, input, select { font:inherit; }
+    button, select, input[type=range] { cursor:pointer; }
+    a { color:inherit; text-underline-offset:.22em; }
+    :focus-visible { outline:3px solid #937033; outline-offset:3px; }
+    .wrap { width:min(1120px, calc(100% - 40px)); margin-inline:auto; }
+    .mast { background:var(--dark); color:#f9f4e8; }
+    .bar { display:flex; align-items:center; justify-content:space-between; gap:.8rem; padding-block:.75rem; border-bottom:1px solid #456054; }
+    .brand { display:flex; direction:ltr; align-items:center; gap:.65rem; font-size:1.05rem; font-weight:750; letter-spacing:.04em; }
+    .brand svg { flex:none; }
+    nav { display:flex; gap:.9rem; align-items:center; font-size:.84rem; }
+    nav a { text-decoration:none; }
+    nav a:hover { text-decoration:underline; }
+    nav button { color:var(--gold); border:1px solid #668076; background:none; padding:.18rem .62rem; border-radius:.4rem; }
+    .hero { padding:1.45rem 0 1.65rem; display:grid; grid-template-columns:1fr auto; gap:1rem 2rem; align-items:center; }
+    .kicker { margin:0; color:#45685a; font-size:.78rem; font-weight:750; letter-spacing:.06em; }
+    .mast .kicker { color:var(--gold); }
+    h1,h2,h3,p { margin:0; }
+    h1 { font-size:clamp(1.85rem, 4.1vw, 3.5rem); line-height:1.19; margin:.27rem 0 .48rem; letter-spacing:-.02em; }
+    [lang=en] h1 { font-family:Georgia,serif; }
+    [lang=fa] h1 { letter-spacing:0; }
+    .hero p:last-child { max-width:65ch; color:#e0eae2; font-size:.96rem; }
+    .dataset { display:grid; grid-template-columns:repeat(2,minmax(6.6rem,1fr)); gap:.7rem; }
+    .dataset > div { border-inline-start:1px solid #668076; padding-inline-start:.75rem; }
+    .dataset strong { display:block; font-size:1.55rem; font-weight:720; line-height:1.1; color:var(--gold); }
+    .dataset span { font-size:.78rem; color:#e0eae2; }
+    main { padding-block:1.15rem 2.5rem; }
+    section { margin-block:0 1rem; scroll-margin-top:.7rem; }
+    .section-top { display:flex; align-items:flex-start; justify-content:space-between; gap:.6rem 1rem; margin-block-end:.63rem; }
+    h2 { font-size:clamp(1.25rem, 2.5vw, 1.6rem); line-height:1.35; }
+    h3 { font-size:.98rem; }
+    .sub { color:var(--muted); font-size:.84rem; }
+    .badge { white-space:nowrap; border-radius:2rem; padding:.18rem .7rem; background:#e4eee4; color:#244e3c; font-size:.74rem; font-weight:700; }
+    .panel { background:var(--card); border:1px solid var(--border); border-radius:.8rem; padding:1rem; min-width:0; }
+    .lab-grid { display:grid; grid-template-columns:minmax(235px, .78fr) minmax(0, 2fr); gap:.8rem; }
+    .fields { display:grid; align-content:start; gap:.55rem; }
+    .fields label { display:block; font-size:.81rem; font-weight:650; }
+    .fields select, .fields input { width:100%; border:1px solid #b4c1b4; border-radius:.35rem; color:var(--ink); padding:.28rem .5rem; background:#fffef9; }
+    select.odor, #seed { direction:ltr; text-align:left; }
+    .order-seed { display:grid; grid-template-columns:1.25fr .75fr; gap:.55rem; }
+    .run,.tool { border:1px solid #275144; border-radius:.38rem; font-weight:650; font-size:.84rem; padding:.38rem .68rem; }
+    .run { background:var(--dark); color:#fffdf6; margin-block-start:.1rem; }
+    .run:hover { background:#245545; }
+    .tool { color:#244e3c; background:#f3f7ee; }
+    .tool:hover { background:#e2edde; }
+    .message { color:#8b391f; font-size:.8rem; font-weight:650; }
+    .result-head { display:flex; flex-wrap:wrap; gap:.22rem .7rem; align-items:baseline; justify-content:space-between; }
+    .metrics { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.65rem; margin-block:.55rem; }
+    .metric { border-block-start:3px solid var(--series); padding:.4rem .15rem .05rem; }
+    .metric strong { display:block; font-size:clamp(1.22rem, 2.6vw, 1.65rem); line-height:1.2; color:var(--series); }
+    .metric span { font-size:.76rem; }
+    .plot { display:block; width:100%; height:auto; direction:ltr; }
+    .timeline { display:flex; gap:.55rem; align-items:center; flex-wrap:wrap; margin-block:.75rem .5rem; }
+    .timeline label { font-weight:650; font-size:.81rem; }
+    input[type=range] { flex:1 1 8rem; max-width:24rem; min-width:5rem; accent-color:var(--obs); direction:ltr; }
+    .tracks { display:grid; grid-template-columns:1fr 1fr; gap:.6rem; }
+    .track { border:1px solid var(--border); border-radius:.5rem; padding:.55rem .65rem; font-size:.82rem; }
+    .track h3 { margin-block-end:.18rem; color:var(--series); font-size:.87rem; }
+    .track p { overflow-wrap:anywhere; }
+    .outcome { display:inline-block; color:#214c36; background:#e5efe4; font-size:.73rem; font-weight:700; padding:0 .4rem; border-radius:.2rem; margin-block-start:.25rem; }
+    .miss { color:#7c4025; background:#f8e9db; }
+    .bench-layout { display:grid; grid-template-columns:minmax(0, 1.7fr) minmax(215px, .85fr); gap:1rem; align-items:start; }
+    .finding { background:#e9eee2; border-inline-start:4px solid var(--obs); border-radius:.25rem; padding:.7rem .8rem; }
+    .finding strong { display:block; font-size:1.08rem; line-height:1.4; }
+    .finding p { margin-block-start:.35rem; font-size:.87rem; }
+    .table-wrap { overflow-x:auto; margin-block:.8rem .3rem; }
+    table { width:100%; border-collapse:collapse; font-size:.84rem; text-align:start; }
+    th,td { padding:.43rem .55rem; text-align:start; border-block-end:1px solid var(--border); }
+    thead th { background:#ecefe6; }
+    details p, details ul { font-size:.88rem; margin-block:.55rem 0; }
+    summary { font-weight:700; cursor:pointer; }
+    footer { color:var(--muted); font-size:.79rem; padding-block:.1rem 1.4rem; }
+    [hidden] { display:none !important; }
+    @media (max-width:750px) { .hero,.lab-grid,.bench-layout { grid-template-columns:1fr; } .dataset { display:flex; flex-wrap:wrap; } .dataset > div { min-width:7rem; } }
+    @media (max-width:440px) { .wrap { width:calc(100% - 24px); } nav { gap:.45rem; } nav a:first-child { display:none; } .panel { padding:.72rem; } .section-top { flex-wrap:wrap; } .metrics { gap:.35rem; } .tracks { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+  <header class="mast">
+    <div class="wrap">
+      <div class="bar">
+        <span class="brand"><svg width="34" height="31" viewBox="0 0 34 31" aria-hidden="true"><path d="M17 15C10 3 2 2 3 9s8 10 14 6C24 3 32 2 31 9s-8 10-14 6Z" fill="none" stroke="#f0c477" stroke-width="1.5"/><path d="M17 11v13m-4 3 4-5 4 5" fill="none" stroke="#f0c477" stroke-width="1.5" stroke-linecap="round"/></svg>FlyFlip Lab</span>
+        <nav aria-label="FlyFlip Lab"><a href="#lab" data-i="navLab"></a><a href="#benchmark" data-i="navStudy"></a><button type="button" id="language" lang="en">English</button></nav>
+      </div>
+      <div class="hero">
+        <div><p class="kicker" data-i="kicker"></p><h1 data-i="hero"></h1><p data-i="intro"></p></div>
+        <div class="dataset"><div><strong id="odor-count"></strong><span data-i="odorCount"></span></div><div><strong id="edge-count"></strong><span data-i="edgeCount"></span></div></div>
+      </div>
+    </div>
+  </header>
+  <main class="wrap">
+    <noscript>برای اجرای آزمایش جاوااسکریپت را فعال کنید. Enable JavaScript to run the experiment.</noscript>
+    <section id="lab" aria-labelledby="lab-title">
+      <div class="section-top"><div><p class="kicker" data-i="step1"></p><h2 id="lab-title" data-i="labTitle"></h2><p class="sub" data-i="labIntro"></p></div><span class="badge" data-i="browser"></span></div>
+      <div class="lab-grid">
+        <form class="panel fields" id="controls">
+          <div><label for="odor-a" data-i="odorA"></label><select class="odor" id="odor-a" lang="en"></select></div>
+          <div><label for="odor-b" data-i="odorB"></label><select class="odor" id="odor-b" lang="en"></select></div>
+          <div class="order-seed"><div><label for="initial" data-i="firstTarget"></label><select id="initial"><option value="0" data-i="odorA"></option><option value="1" data-i="odorB"></option></select></div><div><label for="seed" data-i="seed"></label><input type="number" id="seed" required min="0" max="4294967295" step="1"></div></div>
+          <button type="submit" class="run" data-i="run"></button>
+          <p class="sub" id="run-note"></p><p class="message" id="error" role="alert" hidden></p>
+          <button type="button" class="tool" id="download" data-i="download"></button>
+        </form>
+        <div class="panel">
+          <div class="result-head"><h3 data-i="early"></h3><p class="sub" id="run-status" role="status"></p></div>
+          <div class="metrics" id="lab-metrics"></div>
+          <svg class="plot" id="lab-plot" viewBox="0 0 660 169" role="img"></svg>
+          <div class="timeline">
+            <button type="button" class="tool" id="jump" data-i="jump"></button>
+            <label for="trial" data-i="trial"></label><input type="range" id="trial" min="1" value="1"><output class="sub" id="trial-label" for="trial"></output>
+          </div>
+          <div class="tracks" id="tracks"></div>
+          <p class="sub" data-i="sampleNote"></p>
+        </div>
+      </div>
+    </section>
+    <section id="benchmark" aria-labelledby="study-title">
+      <div class="section-top"><div><p class="kicker" data-i="step2"></p><h2 id="study-title" data-i="studyTitle"></h2><p class="sub" id="study-count"></p></div><span class="badge" data-i="saved"></span></div>
+      <div class="panel">
+        <div class="bench-layout">
+          <div><h3 data-i="early"></h3><div class="metrics" id="study-metrics"></div><svg class="plot" id="study-plot" viewBox="0 0 660 169" role="img"></svg></div>
+          <aside class="finding"><strong data-i="finding"></strong><p id="control-range"></p><p data-i="scope"></p></aside>
+        </div>
+        <div class="table-wrap"><table><thead><tr><th scope="col" data-i="condition"></th><th scope="col" data-i="before"></th><th scope="col" data-i="early"></th><th scope="col" data-i="late"></th></tr></thead><tbody id="study-table"></tbody></table></div>
+      </div>
+    </section>
+    <section class="panel" id="methods"><details><summary data-i="methods"></summary><p data-i="methodBody"></p><p id="settings"></p><ul id="sources"></ul></details></section>
+  </main>
+  <footer class="wrap" data-i="footer"></footer>
+  <script type="application/json" id="data">__FLYFLIP_LAB__</script>
+  <script>__FLYFLIP_MODEL__</script>
+  <script>__FLYFLIP_UI__</script>
+</body>
+</html>

@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FlyFlip | Olfactory reversal</title>
+<style>
+  :root { color-scheme: light; font: 16px/1.5 system-ui, sans-serif; color: #203428; background: #f4f3e8; }
+  body { margin: 0; }
+  main { max-width: 62rem; margin: auto; padding: 2rem 1rem 3rem; }
+  h1 { font: 700 clamp(2.5rem, 8vw, 4.5rem)/1.05 Georgia, serif; margin: .15em 0; }
+  h2 { margin: 0 0 .5rem; font-size: 1.3rem; }
+  p { margin: .55rem 0; }
+  .kicker { color: #456550; font-size: .8rem; letter-spacing: .12em; text-transform: uppercase; }
+  .box { background: #fffef8; border: 1px solid #cfdbc8; padding: 1rem 1.2rem; margin: 1rem 0; }
+  .metrics, .comparison { display: grid; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); gap: .8rem; }
+  .metric { border-top: 3px solid #326749; padding-top: .45rem; }
+  .metric strong { display: block; font: 700 2rem Georgia, serif; }
+  .controls { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; margin: 1rem 0; }
+  button { border: 1px solid #214b38; border-radius: .25rem; background: #f9fff3; padding: .45rem .7rem; color: #214b38; font: inherit; cursor: pointer; }
+  button:hover { background: #e3efdb; }
+  input { accent-color: #316e4b; width: min(22rem, 100%); }
+  .route { border: 1px solid #d3dbce; padding: .55rem; margin: .4rem 0; display: flex; flex-wrap: wrap; gap: .4rem; align-items: baseline; }
+  .route.chosen { border: 2px solid #2e5c43; padding: calc(.55rem - 1px); }
+  .tag { font-size: .72rem; font-weight: 700; text-transform: uppercase; }
+  .target { color: #845127; }
+  svg { width: 100%; height: auto; display: block; }
+  a { color: #225a41; }
+  .caption { color: #4c6255; font-size: .9rem; }
+</style>
+<main>
+  <header>
+    <p class="kicker">FlyFlip / recorded CPU experiment</p>
+    <h1>When the reward moves</h1>
+    <p>Two measured odor profiles. A simulated choice. Can a learner change direction after the reward switches?</p>
+  </header>
+  <section class="box" aria-labelledby="results">
+    <h2 id="results">Correct choices in the first 20 trials after the switch</h2>
+    <p id="scope" class="caption"></p>
+    <div class="metrics" id="metrics"></div>
+    <svg id="curve" viewBox="0 0 760 220" role="img" aria-label="Choice accuracy over trials with the reward switch marked at trial 61"></svg>
+    <p class="caption">Green: observed wiring. Orange: mean of rewired controls. Blue: direct receptor input. Dotted line: 50%.</p>
+  </section>
+  <section class="box" aria-labelledby="replay">
+    <h2 id="replay">Replay one recorded episode</h2>
+    <p class="caption">The odor pair was chosen by median similarity of its receptor measurements, before looking at learning outcomes. The control shown is the first seeded rewire.</p>
+    <div class="controls">
+      <button id="play" type="button">Play</button>
+      <button id="switch" type="button">Jump to reward switch</button>
+      <label for="trial">Trial</label>
+      <input id="trial" type="range" min="1" value="1">
+      <output id="step" for="trial"></output>
+    </div>
+    <div class="comparison" id="tracks"></div>
+  </section>
+  <footer class="caption">
+    <p>Observed wiring from <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC9413950/">Zheng et al., adult FAFB</a>. Normalized odor responses from <a href="https://docs.ropensci.org/DoOR.data/reference/door_response_matrix.html">DoOR 2.0</a>. Choices and rewards come from the stated simulation protocol.</p>
+  </footer>
+</main>
+<script type="application/json" id="study">{"switch": 60, "odors": ["isopentyl acetate", "2,3-butanedione"], "tracks": {"observed": {"choices": [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], "rewarded": [false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, true, false, true, false, false, false, true, true, true, false, true, true, true, true, false, true, true, true, true, true, false, true, true, true, true, true, true, true, true, false, true, true, true, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true]}, "rewired": {"choices": [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], "rewarded": [false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, true, false, true, false, false, false, true, true, true, false, true, true, true, true, false, true, true, true, true, true, false, true, true, true, true, true, true, true, true, false, true, true, true, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true]}}, "trials": {"observed": [0.5056980056980057, 0.7174145299145299, 0.8133903133903134, 0.8701032763532763, 0.8944978632478633, 0.9116809116809117, 0.9168447293447294, 0.9228988603988604, 0.9195156695156695, 0.9234330484330484, 0.9222756410256411, 0.927795584045584, 0.9253027065527065, 0.92619301994302, 0.9271723646723646, 0.9205840455840456, 0.9238782051282052, 0.92619301994302, 0.9282407407407407, 0.9286858974358975, 0.9217414529914529, 0.9237001424501424, 0.9237001424501424, 0.9205840455840456, 0.9242343304843305, 0.9262820512820513, 0.9293981481481481, 0.9242343304843305, 0.9261039886039886, 0.927261396011396, 0.9218304843304843, 0.9197827635327636, 0.9258368945868946, 0.9245014245014245, 0.9276175213675214, 0.9238782051282052, 0.9243233618233618, 0.9252136752136753, 0.9232549857549858, 0.9285078347578347, 0.9245904558404558, 0.9238782051282052, 0.9217414529914529, 0.9221866096866097, 0.9262820512820513, 0.9285968660968661, 0.9242343304843305, 0.9251246438746439, 0.9205840455840456, 0.9317129629629629, 0.9249465811965812, 0.9237891737891738, 0.9250356125356125, 0.9251246438746439, 0.9229878917378918, 0.9236111111111112, 0.9242343304843305, 0.9238782051282052, 0.9201388888888888, 0.9261039886039886, 0.07362891737891739, 0.07727920227920228, 0.07540954415954416, 0.07247150997150997, 0.08475783475783476, 0.25614316239316237, 0.31374643874643876, 0.36600783475783477, 0.40705128205128205, 0.4491631054131054, 0.48388532763532766, 0.510238603988604, 0.5340990028490028, 0.5665954415954416, 0.5902777777777778, 0.6132478632478633, 0.6363960113960114, 0.6490384615384616, 0.6714743589743589, 0.6868767806267806, 0.7053062678062678, 0.7204415954415955, 0.7353098290598291, 0.7463497150997151, 0.7542735042735043, 0.7686965811965812, 0.782051282051282, 0.7829415954415955, 0.7977207977207977, 0.8082264957264957, 0.8133903133903134, 0.82247150997151, 0.8301282051282052, 0.8303952991452992, 0.8393874643874644, 0.8478454415954416, 0.8490028490028491, 0.8498931623931624, 0.8579950142450142, 0.8619123931623932, 0.8614672364672364, 0.8667200854700855, 0.8718839031339032, 0.8750890313390314, 0.8790954415954416, 0.8812321937321937, 0.8839921652421653, 0.8848824786324786, 0.8887108262108262, 0.8915598290598291, 0.8892450142450142, 0.8933404558404558, 0.895744301994302, 0.8978810541310541, 0.9024216524216524, 0.9037571225071225, 0.8983262108262108, 0.9071403133903134, 0.9069622507122507, 0.9088319088319088], "rewired": [0.5056980056980056, 0.7174145299145299, 0.8133903133903134, 0.8701032763532764, 0.8944978632478636, 0.9116809116809114, 0.9168447293447296, 0.9228988603988603, 0.9195156695156697, 0.9234330484330487, 0.922275641025641, 0.9277955840455837, 0.9253027065527065, 0.9261930199430198, 0.9271723646723645, 0.9205840455840454, 0.923878205128205, 0.9261930199430198, 0.9282407407407406, 0.9286858974358977, 0.921741452991453, 0.9237001424501424, 0.9237001424501424, 0.9205840455840454, 0.9242343304843303, 0.9262820512820512, 0.9293981481481483, 0.9242343304843303, 0.9261039886039887, 0.9272613960113959, 0.9218304843304844, 0.9197827635327637, 0.9258368945868943, 0.9245014245014248, 0.9276175213675214, 0.923878205128205, 0.9243233618233618, 0.9252136752136751, 0.9232549857549857, 0.9285078347578346, 0.9245904558404555, 0.923878205128205, 0.921741452991453, 0.9221866096866099, 0.9262820512820512, 0.9285968660968661, 0.9242343304843303, 0.925124643874644, 0.9205840455840454, 0.9317129629629631, 0.924946581196581, 0.9237891737891739, 0.9250356125356126, 0.925124643874644, 0.9229878917378916, 0.9236111111111108, 0.9242343304843303, 0.923878205128205, 0.9201388888888892, 0.9261039886039887, 0.0736289173789174, 0.07727920227920228, 0.07540954415954416, 0.07247150997150997, 0.08468364197530864, 0.2558612298195631, 0.3114983974358974, 0.36652718423551756, 0.4072961182336183, 0.4486882716049383, 0.4853543447293447, 0.513198896011396, 0.5374080009496676, 0.5687099358974358, 0.5926296889838556, 0.6143681742640076, 0.6371453584995251, 0.6505148979107312, 0.6736482075023743, 0.6890506291547958, 0.7072575379867047, 0.7230680199430198, 0.7376765788224122, 0.7492506528964863, 0.7572708926875594, 0.7715678418803419, 0.7846257716049383, 0.7852118945868946, 0.7988559472934473, 0.8099551875593543, 0.8143177231718898, 0.8238069800569799, 0.8320127018043686, 0.8323465693257358, 0.8411458333333334, 0.8497225189933523, 0.8511025047483382, 0.8515625000000001, 0.8601169278252613, 0.8637894705603039, 0.8641604344729346, 0.8685971628679963, 0.874235814339981, 0.8768028846153846, 0.8809576804368472, 0.8831018518518517, 0.8855947293447294, 0.8862921415004749, 0.8900982312440645, 0.8929917497625831, 0.8905433879392212, 0.8943346391263055, 0.8970871913580245, 0.8988826566951568, 0.9031413224121557, 0.9044990503323836, 0.8988900759734094, 0.9074890194681862, 0.9073257953466288, 0.9095144824311491], "direct": [0.5056980056980057, 0.7174145299145299, 0.8133903133903134, 0.8701032763532763, 0.8944978632478633, 0.9116809116809117, 0.9168447293447294, 0.9228988603988604, 0.9195156695156695, 0.9234330484330484, 0.9222756410256411, 0.927795584045584, 0.9253027065527065, 0.92619301994302, 0.9271723646723646, 0.9205840455840456, 0.9238782051282052, 0.92619301994302, 0.9282407407407407, 0.9286858974358975, 0.9217414529914529, 0.9237001424501424, 0.9237001424501424, 0.9205840455840456, 0.9242343304843305, 0.9262820512820513, 0.9293981481481481, 0.9242343304843305, 0.9261039886039886, 0.927261396011396, 0.9218304843304843, 0.9197827635327636, 0.9258368945868946, 0.9245014245014245, 0.9276175213675214, 0.9238782051282052, 0.9243233618233618, 0.9252136752136753, 0.9232549857549858, 0.9285078347578347, 0.9245904558404558, 0.9238782051282052, 0.9217414529914529, 0.9221866096866097, 0.9262820512820513, 0.9285968660968661, 0.9242343304843305, 0.9251246438746439, 0.9205840455840456, 0.9317129629629629, 0.9249465811965812, 0.9237891737891738, 0.9250356125356125, 0.9251246438746439, 0.9229878917378918, 0.9236111111111112, 0.9242343304843305, 0.9238782051282052, 0.9201388888888888, 0.9261039886039886, 0.07362891737891739, 0.07727920227920228, 0.07540954415954416, 0.07247150997150997, 0.07175925925925926, 0.0787037037037037, 0.08858618233618233, 0.11182336182336182, 0.1337250712250712, 0.1674679487179487, 0.19818376068376067, 0.2272079772079772, 0.25213675213675213, 0.2800925925925926, 0.30778133903133903, 0.338230056980057, 0.3573717948717949, 0.37767094017094016, 0.3994836182336182, 0.4224537037037037, 0.45014245014245013, 0.4674145299145299, 0.48673433048433046, 0.5091702279202279, 0.5234152421652422, 0.5430021367521367, 0.5560897435897436, 0.5691773504273504, 0.5899216524216524, 0.6101317663817664, 0.6210826210826211, 0.6346153846153846, 0.6523326210826211, 0.6638176638176638, 0.6718304843304843, 0.6892806267806267, 0.698272792022792, 0.7047720797720798, 0.7202635327635327, 0.7309472934472935, 0.7370014245014245, 0.7465277777777778, 0.7552528490028491, 0.7628205128205128, 0.7735042735042735, 0.7816951566951567, 0.7881054131054132, 0.7927350427350427, 0.8008368945868946, 0.8054665242165242, 0.8083155270655271, 0.8164173789173789, 0.8215811965811965, 0.8263888888888888, 0.833244301994302, 0.8378739316239316, 0.8369836182336182, 0.8467770655270656, 0.8520299145299145, 0.8552350427350427]}, "early": [0.40588942307692305, 0.40676860754985755, 0.20557336182336183], "episodes": 11232, "odorCount": 27, "rewireCount": 12}</script>
+<script>
+  const study = JSON.parse(document.getElementById('study').textContent);
+  const get = id => document.getElementById(id);
+  const pct = value => `${(value * 100).toFixed(2)}%`;
+  const labels = ['Observed wiring', 'Rewired mean', 'Direct receptors'];
+  get('scope').textContent = `${study.odorCount} measured odor profiles · ${study.episodes.toLocaleString()} simulated episodes per condition · ${study.rewireCount} rewires`;
+  study.early.forEach((value, index) => {
+    const card = document.createElement('div');
+    card.className = 'metric';
+    const number = document.createElement('strong');
+    number.textContent = pct(value);
+    card.append(number, labels[index]);
+    get('metrics').append(card);
+  });
+  const plot = get('curve');
+  function svg(tag, attrs, text) {
+    const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+    for (const [key, value] of Object.entries(attrs)) el.setAttribute(key, value);
+    if (text) el.textContent = text;
+    plot.append(el);
+  }
+  const x = i => 52 + i * 680 / (study.trials.observed.length - 1);
+  const y = value => 184 - value * 145;
+  for (const value of [0, .5, 1]) {
+    svg('line', {x1: 52, x2: 732, y1: y(value), y2: y(value), stroke: '#c4cfc3', 'stroke-dasharray': value === .5 ? '3 4' : 'none'});
+    svg('text', {x: 44, y: y(value) + 5, 'text-anchor': 'end', fill: '#4c6255', 'font-size': 13}, `${value * 100}%`);
+  }
+  svg('line', {x1: x(study.switch), x2: x(study.switch), y1: 34, y2: 184, stroke: '#845127', 'stroke-dasharray': '5 5'});
+  svg('text', {x: x(study.switch), y: 23, 'text-anchor': 'middle', fill: '#845127', 'font-size': 14}, 'Reward switches');
+  for (const [key, color] of [['rewired', '#ad5c26'], ['direct', '#415f9e'], ['observed', '#286543']]) {
+    svg('polyline', {points: study.trials[key].map((value, i) => `${x(i)},${y(value)}`).join(' '), fill: 'none', stroke: color, 'stroke-width': 2});
+  }
+  svg('text', {x: 52, y: 205, fill: '#4c6255', 'font-size': 13}, 'Trial 1');
+  svg('text', {x: 732, y: 205, 'text-anchor': 'end', fill: '#4c6255', 'font-size': 13}, `Trial ${study.trials.observed.length}`);
+
+  const slider = get('trial');
+  const last = study.tracks.observed.choices.length;
+  slider.max = last;
+  function render() {
+    const index = Number(slider.value) - 1;
+    const target = index < study.switch ? 0 : 1;
+    get('step').textContent = `${index + 1} / ${last} · ${target ? 'After switch' : 'Before switch'}`;
+    const tracks = get('tracks');
+    tracks.replaceChildren();
+    for (const [key, title] of [['observed', 'Observed wiring'], ['rewired', 'Rewired control 1']]) {
+      const track = study.tracks[key];
+      const card = document.createElement('div');
+      const header = document.createElement('h3');
+      header.textContent = title;
+      card.append(header);
+      study.odors.forEach((odor, route) => {
+        const row = document.createElement('div');
+        const chosen = track.choices[index] === route;
+        row.className = chosen ? 'route chosen' : 'route';
+        row.textContent = odor;
+        const status = document.createElement('span');
+        status.className = 'tag target';
+        status.textContent = `${route === target ? 'Reward here' : ''}${chosen ? (track.rewarded[index] ? ' · Chosen ✓' : ' · Chosen') : ''}`;
+        row.append(status);
+        card.append(row);
+      });
+      tracks.append(card);
+    }
+  }
+  let timer;
+  function pause() {
+    clearInterval(timer);
+    timer = undefined;
+    get('play').textContent = 'Play';
+  }
+  slider.addEventListener('input', () => { pause(); render(); });
+  get('switch').addEventListener('click', () => { pause(); slider.value = study.switch + 1; render(); });
+  get('play').addEventListener('click', () => {
+    if (timer) { pause(); return; }
+    if (+slider.value === last) slider.value = 1;
+    render();
+    get('play').textContent = 'Pause';
+    timer = setInterval(() => {
+      slider.value = Number(slider.value) + 1;
+      render();
+      if (+slider.value === last) pause();
+    }, 180);
+  });
+  render();
+</script>
+</html>

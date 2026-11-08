@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "flyflip"
+version = "0.2.0"
+description = "An olfactory reversal experiment using published fruit-fly connectivity and odor responses"
+requires-python = ">=3.11"
+dependencies = ["numpy>=1.26,<3", "scipy>=1.12,<2", "pandas>=2.2,<4"]
+
+[project.optional-dependencies]
+test = ["pytest>=8,<10"]
+
+[tool.setuptools.packages.find]
+include = ["flyflip*"]
+
+[tool.setuptools.package-data]
+flyflip = ["replay.html", "lab.html", "lab-model.js", "lab-ui.js"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
