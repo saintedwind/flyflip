@@ -1,0 +1,25 @@
+name: Measured-data and browser-model regression tests
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      matrix:
+        python: ['3.11', '3.12']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+          cache: pip
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: python -m pip install -e '.[test]'
+      - name: Fetch and verify pinned measurements
+        run: python -m flyflip fetch
+      - name: Test source integrity and Python/browser agreement
+        run: python -m pytest -q -ra

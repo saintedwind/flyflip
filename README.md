@@ -33,6 +33,12 @@ The fetch step needs public GitHub access. The model and tests then use the four
 
 The cross-runtime test uses Node.js. It compares browser and Python results for three measured odor pairs with identical random draws, including all 12 control circuits in the control average. A separate test compares the linear update against an explicit weight vector.
 
+The regression workflow runs on pushes and pull requests with Python 3.11 and
+3.12 and Node.js 22. It fetches the pinned measurement files, checks their
+SHA-256 digests, and runs the source-integrity and Python/browser agreement
+tests. This checks the simulation implementation; it does not validate the
+model against biological behavior.
+
 ## Inputs and selection
 
 1. **Anatomy.** [Zheng et al., Current Biology, 2022](https://pmc.ncbi.nlm.nih.gov/articles/PMC9413950/), Table S4, traces contacts at the PN bouton and KC claw level in the adult FAFB specimen. The [authors' table](https://github.com/bocklab/pn_kc/blob/96fb0de1833539a0643ecc136b8a0dcd50d34932/data/201001_bouton_claw_table.csv) contains 6,468 contact rows, 113 PNs and 1,354 KCs. Each observed PN/KC pair becomes one binary edge. Multiple contacts do not imply measured functional strength. The original MaleCNS plan changed after the bulk endpoint returned HTTP 403 in this environment. This analysis uses the separately published adult FAFB sample throughout.
