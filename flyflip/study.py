@@ -19,6 +19,14 @@ class Protocol:
     swaps_per_edge: int = 5
     seed: int = 1729
 
+    def __post_init__(self):
+        # Recovery is defined over ten trials; summary windows stay within a phase.
+        if type(self.phase_trials) is not int or self.phase_trials < 10:
+            raise ValueError("phase_trials must be an integer of at least 10")
+        if (type(self.early_trials) is not int
+                or not 1 <= self.early_trials <= self.phase_trials):
+            raise ValueError("early_trials must be an integer between 1 and phase_trials")
+
 
 def matrix(pn, kc, shape):
     """One binary edge per observed PN/KC pair, regardless of contact count."""
