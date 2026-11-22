@@ -1,9 +1,7 @@
 """Pin the upstream tables and extract a complete, attributable odor panel."""
 
-import base64
 from dataclasses import dataclass
 from hashlib import sha256
-import json
 from pathlib import Path
 from urllib.request import Request, urlopen
 
@@ -59,13 +57,10 @@ def fetch(directory):
         if path.is_file():
             verify(path, expected)
             continue
-        url = f"https://api.github.com/repos/{repo}/contents/data/{name}?ref={commit}"
-        request = Request(url, headers={"Accept": "application/vnd.github+json", "User-Agent": "FlyFlip"})
+        url = f"https://raw.githubusercontent.com/{repo}/{commit}/data/{name}"
+        request = Request(url, headers={"User-Agent": "FlyFlip"})
         with urlopen(request, timeout=45) as response:
-            item = json.load(response)
-        if item.get("encoding") != "base64" or item.get("name") != name:
-            raise ValueError(f"Unexpected upstream response for {name}")
-        contents = base64.b64decode("".join(item["content"].split()), validate=True)
+            contents = response.read()
         if sha256(contents).hexdigest() != expected:
             raise ValueError(f"SHA-256 mismatch for {name}")
         temporary = path.with_suffix(".partial")
