@@ -2,6 +2,8 @@
 
 from dataclasses import dataclass
 from itertools import combinations
+from math import isfinite
+from numbers import Real
 
 import numpy as np
 from scipy.sparse import csr_matrix
@@ -20,6 +22,16 @@ class Protocol:
     seed: int = 1729
 
     def __post_init__(self):
+        for name in ("learning_rate", "exploration", "active_fraction"):
+            value = getattr(self, name)
+            if isinstance(value, bool) or not isinstance(value, Real) or not isfinite(value):
+                raise ValueError(f"{name} must be a finite real number")
+        if self.learning_rate < 0:
+            raise ValueError("learning_rate must be non-negative")
+        if not 0 <= self.exploration <= 1:
+            raise ValueError("exploration must be between 0 and 1")
+        if not 0 < self.active_fraction <= 1:
+            raise ValueError("active_fraction must be greater than 0 and at most 1")
         # Recovery is defined over ten trials; summary windows stay within a phase.
         if type(self.phase_trials) is not int or self.phase_trials < 10:
             raise ValueError("phase_trials must be an integer of at least 10")
